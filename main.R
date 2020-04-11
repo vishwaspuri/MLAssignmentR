@@ -3,6 +3,7 @@ library(datasets)
 library(kernlab)
 library(MASS)
 flowerData=iris
+data(iris)
 set.seed(42)
 #----------------------------------------------------------
 #Exploring data
@@ -88,7 +89,6 @@ print(accuracy(prediction.pca,testingDataset.pca[,2]))
 #----------------------------------------------------------
 #Fischers Linear Discriminant and classification
 #----------------------------------------------------------
-data(iris) 
 x <- cbind(iris$Petal.Length,iris$Petal.Width) 
 Y <- ifelse(iris$Species == "virginica", +1, -1) 
 u <- apply(x,2,mean) 
@@ -97,6 +97,14 @@ un <- apply(subset(x,Y==-1),2,mean)
 np <- sum(Y==+1)
 nn <- sum(Y==-1) 
 SB <- nn * (un - u) %*% t(up - u)
+distance.from.plane = function(x,w,b) {
+  b - sum(x*w)
+}
+classify.fisher = function(x,w,b){
+  distances =
+    apply(x, 1, distance.from.plane, w, b)
+  return(ifelse(distances < 0, -1, +1))
+}
 scatter <- function(v){ 
 ( (v - un) %*% t(v - un) ) + ( (v - up) %*% t(v - up) ) 
 } 
@@ -138,16 +146,18 @@ sum(X$class != X$pred)
 LDA <- lda(Species ~ ., data = iris) 
 X <- data.frame(predict(LDA)$x) 
 X$class <- factor(ifelse(predict(LDA)$class == iris$Species, + as.numeric(iris$Species), 0)) 
-library(ggplot2) 
+library(ggplot2, warn.conflicts = FALSE) 
 color <- c("red", "green", "blue","purple") 
 pts <- 50000
 cube <- data.frame(apply(apply(iris[,1:4],2,range),2,rpts,pts)) 
 cube.pred <- predict(LDA,cube) 
 X.grid <- data.frame(cube.pred$x) 
 X.grid$class <- factor(as.numeric(cube.pred$class)) 
-p <- ggplot(X, aes(x = LD1, y = LD2)) +
+p <- ggplot(X, aes(x = LD1, y = LD2))+
 geom_point(aes(colour=class),size=3) 
 p + geom_point(data=X.grid,aes(colour=class),size=0.5) 
-sum(iris$Species != predict(LDA)$class)
-
-
+print("Accuracy after FLD classification")
+print(accuracy(iris$Species,predict(LDA)$class))
+#----------------------------------------------------------
+#Metric learning and classification
+#----------------------------------------------------------
