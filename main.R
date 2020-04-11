@@ -159,7 +159,7 @@ p + geom_point(data=X.grid,aes(colour=class),size=0.5)
 print("Accuracy after FLD classification")
 print(accuracy(iris$Species,predict(LDA)$class))
 #----------------------------------------------------------
-#k-nearest neighbors(KNN) algorithm and classification
+#k-Nearest Neighbour algorithm and classification
 #----------------------------------------------------------
 #Following packages are required:
 library(class)
